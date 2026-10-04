@@ -15,6 +15,7 @@ class Employee(BaseModel):
 
 app = FastAPI()
 
+
 @app.get("/employees")
 def get_employees():
     cursor.execute("SELECT * FROM employees")
@@ -23,41 +24,43 @@ def get_employees():
     employees_list = []
 
     for employee in employees_from_db:
-        employee_dict =  { 
+        employee_dict = {
             "id": employee[0],
             "name": employee[1],
             "department": employee[2],
             "position": employee[3]
         }
-        
+
         employees_list.append(employee_dict)
+
     return employees_list
+
 
 @app.get("/employees/{employee_id}")
 def get_employee(employee_id: int):
     cursor.execute(
-    "SELECT * FROM employees WHERE id = ?",
-    (employee_id,)
+        "SELECT * FROM employees WHERE id = ?",
+        (employee_id,)
     )
-    
+
     employee = cursor.fetchone()
-        
+
     if employee is None:
         raise HTTPException(
             status_code=404,
             detail="Employee not found"
         )
-        
-    employee_dict =  { 
+
+    employee_dict = {
         "id": employee[0],
         "name": employee[1],
         "department": employee[2],
         "position": employee[3]
     }
-            
+
     return employee_dict
-    
-    
+
+
 @app.post("/employees")
 def create_employee(employee: Employee):
     try:
@@ -81,6 +84,7 @@ def create_employee(employee: Employee):
 
     return employee
 
+
 @app.delete("/employees/{employee_id}")
 def delete_employee(employee_id: int):
     cursor.execute(
@@ -102,31 +106,32 @@ def delete_employee(employee_id: int):
     )
 
     connection.commit()
-    
-    employee_dict =  { 
+
+    employee_dict = {
         "id": employee[0],
         "name": employee[1],
         "department": employee[2],
         "position": employee[3]
     }
+
     return employee_dict
-    
-    
+
+
 @app.put("/employees/{employee_id}")
 def put_employee(employee_id: int, employee: Employee):
     cursor.execute(
         "SELECT * FROM employees WHERE id = ?",
         (employee_id,)
     )
-    
+
     existing_employee = cursor.fetchone()
-    
+
     if existing_employee is None:
         raise HTTPException(
             status_code=404,
             detail="Employee not found"
         )
-        
+
     cursor.execute("""
         UPDATE employees
         SET name = ?, department = ?, position = ?
@@ -137,9 +142,9 @@ def put_employee(employee_id: int, employee: Employee):
         employee.position,
         employee_id
     ))
-    
+
     connection.commit()
-    
+
     employee_dict = {
         "id": employee_id,
         "name": employee.name,
